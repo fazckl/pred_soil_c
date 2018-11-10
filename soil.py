@@ -3,17 +3,16 @@ from keras.layers import Activation
 from keras.layers.core import Dense
 from keras.optimizers import Adam
 from keras.metrics import mean_squared_error
-
-
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-import numpy as np
 import tensorflow as tf
 import csv
 import pandas as pd
 
+
+
 def prep_data(path):
-	ReadCsv = pd.read_csv (r'D:\Documents\Unikrahm geordnet\R\KI\Data2.csv')
+	ReadCsv = pd.read_csv(path)
 	
 	df = pd.DataFrame(ReadCsv)
 	
@@ -51,15 +50,16 @@ def train():
 						Dense(21, input_shape=(21,), activation='relu'),
 						Dense(100, activation='relu'),
 						Dense(30, activation='relu'),
-						Dense(1, activation='softmax')
+						Dense(1, activation='relu')
 					])
 	
 					
 	model.compile(Adam(lr=.0001), loss='mean_squared_error', metrics=['accuracy']))
 	
-	model.fit(skal_vects,C_vects, epochs=10, batch_size=6, validation_split=10, verbose=2)
+	model.fit(skal_vects,C_vects, epochs=10, batch_size=6, validation_split=10)
 	
-def predict(input_vec):
+#def predict(input_vec):
+	
 	
 
 
