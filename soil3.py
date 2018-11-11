@@ -16,6 +16,7 @@ import pandas as pd
 ###############################################################################################################
 
 
+
 augment = False
 n_sample_gen  = 15
 
@@ -43,25 +44,25 @@ aug_ranges = {0: [0.05],        #'C'
 			 }
 
 			 
-			 
-			 
-###############################################################################################################			 
+############### AUGMENTATION GERADE AUS	  -      SOLLTE ABER FUNKTIONIEREN
 
 
 def aug_data(data_frame):
-	or_data = np.array(data_frame)
-	gener_data = []
-	for v in or_data:
-		for n in range(n_vgen):
+	original_data = np.array(data_frame)
+	generated_data = []
+	for v in original_data:
+		for n in range(n_sample_gen):
 			generated_sample = []
 			for i, value in enumerate(v):
 				generated_sample.append(value+random.randint[aug_ranges[i]])
 				
-	comb_data = np.concatenate((or_data, gener_data), axis=0)
+	combined_data = np.concatenate((original_data, generated_data), axis=0)
 	
-	return comb_data
+	return combined_data
 
-#####################################
+##################################### HABE DOCH DIE NORMALISIERUNG RAUSGENOMMEN, WEIL ICH MICH DA VERTAN HAB   -    STANDARDISIERUNG REICHT VIELLEICHT WIE DU MEINTEST  
+##################################### DAS IST JA DANN ALLES ETWA IM UMFELD VON KLEINEN WERTEN    -    DIE FRAGE IST NUR OB WEIT ENTFERNTE OUTLIER PROBLEME MACHEN KÖNNTEN
+##################################### DESWEGEN IST HIER AUCH DIE EINTEILUNG IN GRUPPEN NICHT NÖTIG
 
 def prep_data(path):
 	ReadCsv = pd.read_csv(path)
@@ -93,7 +94,7 @@ def train(train_data, labels):
 					])
 	
 					
-	model.compile(Adam(lr=.0001), loss='mean_squared_error', metrics=['accuracy'])
+	model.compile(Adam(lr=.01), loss='mean_squared_error', metrics=['accuracy'])
 	
 	model.fit(skal_vects, C_vects, epochs=10, batch_size=6, validation_split=10)
 
