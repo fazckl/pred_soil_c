@@ -47,7 +47,7 @@ aug_ranges = {0: [0.005],        #'C'
 			 }
 
 			 
-############### AUGMENTATION GERADE AUS	  -      SOLLTE ABER FUNKTIONIEREN
+############### 
 
 
 def aug_data(data_frame):
@@ -84,7 +84,7 @@ def prep_data(path):
 	else:
 		samples = sample_datafrane
 	
-	scaled_samples = scaler.fit_transform(samples)
+	scaled_samples = scaler.fit_transform(samples)         
 	
 	input_data = scaled_samples[:,1:].copy()
 	labels = scaled_samples[:,:1].copy()
@@ -107,6 +107,10 @@ def build_model():
     
     model.compile(loss="mean_squared_error", optimizer='Adam')
     return model
+
+
+###################################  HAUPTPROBLEM WAR, DASS LOSS-FUNCTION UND METRICS AUF EIN
+###################################  KATEGORISIERUNGSPROBLEM AUSGELEGT WAREN WIR ABER EIN REGRESSIONSPROBLEM HABEN
 
 
 def train(train_data, labels):
