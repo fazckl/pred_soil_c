@@ -20,30 +20,30 @@ import random as rn
 
 
 
-augment = False
-n_sample_gen  = 2
+augment = True
+n_sample_gen  = 1
 
-aug_ranges = {0: [0.05],        #'C'         
-			  1: [100.],        #'max'       
-			  2: [100.],        #'median'    
-			  3: [100.],        #'min'       
-			  4: [15.],         #'sd_stdDev' 
-			  5: [8.],          #'aspect'    
-			  6: [100.],        #'elevation' 
-			  7: [10.],         #'hillshade' 
-			  8: [0.5],         #'slope'     
-			  9: [80.],         #'B1'        
-			  10: [80.],        #'B11'       
-			  11: [80.],        #'B12'       
-			  12: [80.],        #'B2'        
-			  13: [80.],        #'B3'        
-			  14: [80.],        #'B4'        
-			  15: [80.],        #'B5'        
-			  16: [80.],        #'B6'        
-			  17: [80.],        #'B7'        
-			  18: [80.],        #'B8'        
-			  19: [80.],        #'B9'        
-			  20: [80.]         #'B10'       
+aug_ranges = {0: [0.005],        #'C'         
+			  1: [10.],        #'max'       
+			  2: [10.],        #'median'    
+			  3: [10.],        #'min'       
+			  4: [1.5],         #'sd_stdDev' 
+			  5: [.8],          #'aspect'    
+			  6: [10.],        #'elevation' 
+			  7: [1.],         #'hillshade' 
+			  8: [0.05],         #'slope'     
+			  9: [8.],         #'B1'        
+			  10: [8.],        #'B11'       
+			  11: [8.],        #'B12'       
+			  12: [8.],        #'B2'        
+			  13: [8.],        #'B3'        
+			  14: [8.],        #'B4'        
+			  15: [8.],        #'B5'        
+			  16: [8.],        #'B6'        
+			  17: [8.],        #'B7'        
+			  18: [8.],        #'B8'        
+			  19: [8.],        #'B9'        
+			  20: [8.]         #'B10'       
 			 }
 
 			 
@@ -100,7 +100,7 @@ def build_model():
                         Dense(250, kernel_initializer='normal', activation='relu'),
                         #Dense(350, kernel_initializer='normal', activation='relu'),
                         #Dense(500, kernel_initializer='normal', activation='relu'),
-                        #Dense(350, kernel_initializer='normal', activation='relu'),
+                        #Dense(2000, kernel_initializer='normal', activation='relu'),
                         Dense(600, kernel_initializer='normal', activation='relu'),
                         Dense(1, kernel_initializer='normal')
                        ])
