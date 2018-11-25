@@ -20,15 +20,13 @@ import random as rn
 import matplotlib
 import matplotlib.pyplot as plt
 from keras.utils import np_utils, generic_utils
-from random import shuffle
-
 
 
 ###############################################################################################################
 
 
 
-augment = True
+augment = False
 n_sample_gen  = 1
 
 aug_ranges = {0: [0.005],        #'C'         
@@ -59,11 +57,7 @@ aug_ranges = {0: [0.005],        #'C'
 
 
 def aug_data(data_frame):
-    original_datas = np.array(data_frame)
-    np.random.shuffle(original_datas.flat) 
-    original_data = original_datas[:51,:].copy()
-    vali = original_datas[51:,:].copy()
-    
+    original_data = np.array(data_frame)
     generated_data = []
 
     for v in original_data:
@@ -80,7 +74,7 @@ def aug_data(data_frame):
     #combined_data = np.concatenate((original_data, generated_data), axis=0)
     
 	
-    return combined_data, vali
+    return combined_data
 
 ##################################### HABE DOCH DIE NORMALISIERUNG RAUSGENOMMEN, WEIL ICH MICH DA VERTAN HAB   -    STANDARDISIERUNG REICHT VIELLEICHT WIE DU MEINTEST  
 ##################################### DAS IST JA DANN ALLES ETWA IM UMFELD VON KLEINEN WERTEN    -    DIE FRAGE IST NUR OB WEIT ENTFERNTE OUTLIER PROBLEME MACHEN KÖNNTEN
@@ -94,8 +88,8 @@ def prep_data(path):
 	scaler = StandardScaler()
 	
 	if augment is True:
-		samples, val = aug_data(sample_datafrane)
-		
+		samples = aug_data(sample_datafrane)
+		val = sample_datafrane
 	else:
 		samples = sample_datafrane
 	val = scaler.fit_transform(val)
@@ -116,18 +110,15 @@ def prep_data(path):
     
 def build_model():
     model = Sequential([Dense(100, input_dim=20, kernel_initializer='normal', activation='relu'),
-                        Dense(2000, kernel_initializer='normal', activation='relu'),
-                        Dense(2000, kernel_initializer='normal', activation='relu'),
-                        #Dense(200, kernel_initializer='normal', activation='relu'),
-                        #Dense(300, kernel_initializer='normal', activation='relu'),
-                        Dense(500, kernel_initializer='normal', activation='relu'),
-                        Dense(2000, kernel_initializer='normal', activation='relu'),
+                        Dense(200, kernel_initializer='normal', activation='relu'),
+                        Dense(300, kernel_initializer='normal', activation='relu'),
+                        #Dense(500, kernel_initializer='normal', activation='relu'),
+                        #Dense(2000, kernel_initializer='normal', activation='relu'),
                         Dense(600, kernel_initializer='normal', activation='relu'),
                         Dense(1, kernel_initializer='normal')
                        ])
-
-    adam = keras.optimizers.Adam(lr=0.0000001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)    
-    model.compile(loss="mean_squared_error", optimizer=adam)
+    
+    model.compile(loss="mean_squared_error", optimizer='Adam')
     return model
 
 
@@ -164,7 +155,7 @@ def predict(data):
 	
 	
 input_data, labels, val = prep_data(r'D:\Documents\Unikrahm geordnet\R\KI/Data2.csv')
-nb_epoch=50
+nb_epoch=200
 hist = train(input_data, labels, val,nb_epoch)
 
 ####################Plot##########################

@@ -1,9 +1,11 @@
+from __future__ import unicode_literals
 from keras.callbacks import History
 hist = History()
 from keras import losses
 from keras.models import Sequential
 from keras.layers import Activation
 from keras.layers.core import Dense
+from keras.layers.core import Dropout
 from keras.optimizers import Adam
 from keras.metrics import mean_squared_error
 from keras.wrappers.scikit_learn import KerasRegressor
@@ -28,7 +30,7 @@ from random import shuffle
 
 
 
-augment = True
+augment = False
 n_sample_gen  = 1
 
 aug_ranges = {0: [0.005],        #'C'         
@@ -59,10 +61,7 @@ aug_ranges = {0: [0.005],        #'C'
 
 
 def aug_data(data_frame):
-    original_datas = np.array(data_frame)
-    np.random.shuffle(original_datas.flat) 
-    original_data = original_datas[:51,:].copy()
-    vali = original_datas[51:,:].copy()
+    
     
     generated_data = []
 
@@ -86,47 +85,82 @@ def aug_data(data_frame):
 ##################################### DAS IST JA DANN ALLES ETWA IM UMFELD VON KLEINEN WERTEN    -    DIE FRAGE IST NUR OB WEIT ENTFERNTE OUTLIER PROBLEME MACHEN KÖNNTEN
 ##################################### DESWEGEN IST HIER AUCH DIE EINTEILUNG IN GRUPPEN NICHT NÖTIG
 
-def prep_data(path):
-	ReadCsv = pd.read_csv(path)
-	
-	sample_datafrane = pd.DataFrame(ReadCsv, columns=['C', 'max', 'median', 'min', 'sd_stdDev', 'aspect', 'elevation', 'hillshade', 'slope', 'B1', 'B11', 'B12', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10'])
-	
-	scaler = StandardScaler()
-	
-	if augment is True:
-		samples, val = aug_data(sample_datafrane)
-		
-	else:
-		samples = sample_datafrane
-	val = scaler.fit_transform(val)
-	scaled_samples = scaler.fit_transform(samples)         
-	
-	input_data = scaled_samples[:,1:].copy()
-	labels = scaled_samples[:,:1].copy()
+#####################################  HIERIN SIND 2 PATHS; EINMAL DEN c WERT UND EINMAL DIE DATEN: SIE WERDEN SO SORTIERT DAS DER C WERT AM ANFANG STEHT; DAS HABE ICH
+##################################### GEMACHT UM DEN SPÄTER GEGEN ANDERE PARAMETER ZU TAUSCHEN UND VLLT BESSERE ERGEBNISSE FÜR ANDERE ZIELWERTE ZU ERHALTEN
 
-	orig_samples= val[:,1:].copy()
-	orig_labels = val[:,:1].copy()
-	val= tuple([orig_samples, orig_labels])
+def prep_data(path1, path2):
+        Dataunsortet = pd.read_csv(path1)
+        Cunsortet = pd.read_csv(path2)
+        print(Cunsortet)
+
+        CSortet = Cunsortet.sort_values(by=['OBJECTID'])
+        Datasortet = Dataunsortet.sort_values(by=['OBJECTID'])
+        Concatet = pd.concat([Cunsortet, Dataunsortet], axis=1)
+        IN=list(Concatet.columns.difference(['system:index','OBJECTID','.geo']))
+        Trimmed = Concatet.loc[:, IN]
+        ElevSorted = Trimmed.sort_values(by=['elevation'])
+        length = ElevSorted.shape
+        i = 0
+        vali=pd.DataFrame()
+        test=pd.DataFrame()
+
+        
+        while i<length[0]:
+            temp=ElevSorted.iloc[i:i+5,:]
+            temp=temp.reset_index()
+            vali=vali.append(temp.iloc[0,:])
+            test=test.append(temp.iloc[1:4,:])
+            i+=5
+        
+    
+        test.to_csv(r'D:\Documents\Unikrahm geordnet\R\KI\Figures/Inputs1_3.csv')
+        vali.to_csv(r'D:\Documents\Unikrahm geordnet\R\KI\Figures/Vali1_3.csv')
+        original_data = np.array(test)
+        #original_data = np.random.shuffle(original_data.flat) 
+        vali = np.array(vali)
+       
+   
 	
-	return input_data, labels, val
+        scaler = StandardScaler()
+	
+        if augment is True:
+            samples = aug_data(original_data)
+		
+        else:
+            samples = original_data
+		
+        val = scaler.fit_transform(vali)
+        scaled_samples = scaler.fit_transform(samples)         
+	
+        input_data = scaled_samples[:,1:].copy()
+        labels = scaled_samples[:,:1].copy()
+
+        orig_samples= val[:,1:].copy()
+        orig_labels = val[:,:1].copy()
+        val= tuple([orig_samples, orig_labels])
+	
+        return input_data, labels, val
 
 
 #####################################	
 	
     
 def build_model():
-    model = Sequential([Dense(100, input_dim=20, kernel_initializer='normal', activation='relu'),
-                        Dense(2000, kernel_initializer='normal', activation='relu'),
-                        Dense(2000, kernel_initializer='normal', activation='relu'),
-                        #Dense(200, kernel_initializer='normal', activation='relu'),
-                        #Dense(300, kernel_initializer='normal', activation='relu'),
+    model = Sequential([Dense(100, input_dim=31, kernel_initializer='normal', activation='relu'),
                         Dense(500, kernel_initializer='normal', activation='relu'),
                         Dense(2000, kernel_initializer='normal', activation='relu'),
+                       # Dense(2000, kernel_initializer='normal', activation='relu'),
+                        Dropout(0.01, noise_shape=None, seed=54),
+                        #Dense(200, kernel_initializer='normal', activation='relu'),
+                        #Dense(300, kernel_initializer='normal', activation='relu'),
+                        #Dense(500, kernel_initializer='normal', activation='relu'),
+                        Dense(2000, kernel_initializer='normal', activation='relu'),
+                        Dropout(0.005, noise_shape=None, seed=54),
                         Dense(600, kernel_initializer='normal', activation='relu'),
                         Dense(1, kernel_initializer='normal')
                        ])
 
-    adam = keras.optimizers.Adam(lr=0.0000001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)    
+    adam = keras.optimizers.Adam(lr=0.00000001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)    
     model.compile(loss="mean_squared_error", optimizer=adam)
     return model
 
@@ -163,8 +197,9 @@ def predict(data):
 	
 	
 	
-input_data, labels, val = prep_data(r'D:\Documents\Unikrahm geordnet\R\KI/Data2.csv')
+input_data, labels, val = prep_data(r'D:\Documents\Unikrahm geordnet\R\KI/Inputs.csv',r'D:\Documents\Unikrahm geordnet\R\KI/AimsC.csv')
 nb_epoch=50
+print(val)
 hist = train(input_data, labels, val,nb_epoch)
 
 ####################Plot##########################
